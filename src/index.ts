@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { GradingAssignmentsData, Section, Instructor, Student } from './types';
 
 // read from ../in/file.txt
 const contents = readFileSync(resolve(__dirname, '../in/file.txt'), 'utf8');
@@ -14,17 +15,22 @@ if (!rowMatch) throw new Error('No rows found');
 const prompt = require('prompt-sync')({sigint: true});
 const useLabSectionResponse = prompt('Prioritize assigning students to their lab section instructors? (y/n): ');
 const useLabSection = useLabSectionResponse === 'y';
-const data = {"sections": []};
+let data: GradingAssignmentsData;
+
 if (useLabSection) {
 	const labSectionPrefix = prompt('What is the Canvas section prefix for lab sections? ');
-	// data["section-prefix"] = labSectionPrefix;
+	data = new GradingAssignmentsData(labSectionPrefix);
 	const labSectionNames = prompt('Enter the names of the lab sections, separated by spaces: ').split(' ');
-	for (const section of labSectionNames) {
-		// data["sections"].push({"name": section, "students": []});
-		const taName = prompt(`Enter one name of the TA(s) for ${section}, or enter for next section: `);
-		if (taName) {
-
+	for (const sectionName of labSectionNames) {
+		const section = new Section(sectionName);
+		while (true) {
+			const taName = prompt(`Enter one name of the TA(s) for ${section}, or enter for next section: `);
+			if (taName) {
+				section.instructors.push(new Instructor(taName))
+			} else break;
 		}
+		
+		data.sections.push(section);
 	}
 } else {
 	console.log('Functionality not supported yet.');
@@ -46,14 +52,9 @@ for (const row of rowMatch) {
 	// column 3 is the username with nothing fancy
 	const username = rowContents[2].split('>')[1].split('<')[0].trim();
 
-	// extract instance of text in an a tag with the class "roster_user_name student_context_card_trigger" with arbitrary properties before or after the class attribute
-	const nameRegex = /<a [^>]*class="roster_user_name student_context_card_trigger"[^>]*>[\s\S]+?(?=<\/a>)<\/a>/g;
-	const nameMatch = row.match(nameRegex);
-	if (!nameMatch) throw new Error('No name found');
-	
-	// extract the username. This is the 3rd td element in the row -- there's no specific regex applicable here
-	// maybe it would be best to just go off of td's...
-
-
-	// console.log(name);
+	// column 4 is the sections
+	const sections = rowContents[3].split(`${data.sectionPrefix}`).slice(1).map(section => section.split('</div>')[0].trim()).filter(section => data.sections.map(labSections => labSections.sectionId).includes(section));
+	console.log(sections);
+	if (!sections) throw new Error('No sections found');
+	if (sections.length > 1) throw new Error('More than one section found');
 }

@@ -2,7 +2,7 @@ export class GradingAssignmentsData {
 	"sectionPrefix": string;
 	"sections": Section[];
 
-	constructor(sectionPrefix) {
+	constructor(sectionPrefix: string) {
 		this.sectionPrefix = sectionPrefix;
 		this.sections = [];
 	}
@@ -12,7 +12,7 @@ export class Section {
 	"sectionId": string;
 	"instructors": Instructor[];
 
-	constructor(sectionId) {
+	constructor(sectionId: string) {
 		this.sectionId = sectionId;
 		this.instructors = [];
 	}
@@ -22,7 +22,7 @@ export class Instructor {
 	"name": string;
 	"assignees": Student[];
 
-	constructor(name) {
+	constructor(name: string) {
 		this.name = name;
 		this.assignees = [];
 	}
@@ -34,7 +34,7 @@ export class Student {
 	"pronouns": string;
 	"section": string;
 
-	constructor(name, id, pronouns, section) {
+	constructor(name: string, id: string, pronouns: string, section: string) {
 		this.name = name;
 		this.id = id;
 		this.pronouns = pronouns;
